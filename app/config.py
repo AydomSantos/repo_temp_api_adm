@@ -6,14 +6,17 @@ Configurações Gerais do Projeto
 import os
 from pathlib import Path
 from pydantic import BaseModel
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    pass
 
 # diretorio raiz do backend
 BACK_ROOT = Path(__file__).resolve().parents[1]
+
+try:
+    from dotenv import load_dotenv
+    env_path = BACK_ROOT / ".env"
+    # Carrega o arquivo .env se existir
+    load_dotenv(env_path)
+except ImportError:
+    print("Alerta: python-dotenv não instalado. Variáveis de ambiente não serão carregadas.")
 
 class Settings(BaseModel):
     secret_key: str = os.getenv("SECRET_KEY", "CHANGE_ME_SUPER_KEY_FOR_CLASSROOM")

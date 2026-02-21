@@ -1,0 +1,1 @@
+{"pedidos": {"1": {"email": "teste@gmail.com", "total": 100.0, "status": "pendente", "session_id": "cs_test_a1nACT1iLkDyov83lMm5zvExEnyyoLfbKh9grfUYRAnRijG2DAfQYxfSCF", "itens": [{"nome": "teste", "preco_unitario": 10.0, "quantidade": 10}]}}}

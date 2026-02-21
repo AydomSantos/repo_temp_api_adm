@@ -6,11 +6,24 @@ from app.services.database import insert_pedido, update_pedido_status, get_pedid
 
 router = APIRouter(prefix="/pagamento", tags=["Pagamento"])
 
-# Configura a chave do Stripe
-stripe.api_key = settings.stripe_api_key
-
 @router.post("/checkout", response_model=CheckoutResponse)
 def create_checkout_session(data: CheckoutRequest):
+    # Configura a chave do Stripe dinamicamente a cada requisição
+    stripe.api_key = settings.stripe_api_key
+
+    if not settings.stripe_api_key or "placeholder" in settings.stripe_api_key:
+        print(f"DEBUG: Stripe Key atual: {settings.stripe_api_key}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Chave de API do Stripe não configurada corretamente.")
+
+    if settings.stripe_api_key.startswith("pk_"):
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Erro de Configuração: Você configurou a Chave Pública (pk_...) no backend. O backend exige a Chave Secreta (sk_...)."
+        )
+
+    if not data.itens:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="O carrinho não pode estar vazio.")
+
     try:
         line_items = []
         total_amount = 0
@@ -54,7 +67,9 @@ def create_checkout_session(data: CheckoutRequest):
         return {"checkout_url": checkout_session.url, "session_id": checkout_session.id}
 
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        # Log do erro no console para facilitar a depuração
+        print(f"Erro Stripe: {e}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Erro ao processar pagamento: {str(e)}")
 
 @router.get("/sucesso")
 def payment_success(session_id: str):
