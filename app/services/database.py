@@ -20,6 +20,7 @@ restaurantes_table = db.table("restaurantes")
 fornecedores_table = db.table("fornecedores")
 produtos_table = db.table("produtos")
 pedidos_table = db.table("pedidos")
+metodos_pagamento_table = db.table("metodos_pagamento")
 
 def find_user_by_email(email: str):
     # Retorna usuario por email ou None, se não existir
@@ -55,6 +56,14 @@ def find_fornecedor_by_email(email: str):
 
 def insert_fornecedor(data: dict):
     return fornecedores_table.insert(data)
+
+def update_fornecedor(email: str, updates: dict):
+    query = Query()
+    fornecedores_table.update(updates, query.email == email.lower().strip())
+
+def find_fornecedor_reset_token(token: str):
+    query = Query()
+    return fornecedores_table.get(query.reset_token == token)
 
 # --- Funções para Produtos ---
 def insert_produto(data: dict):
@@ -92,3 +101,32 @@ def update_pedido_status(session_id: str, status: str):
 def get_pedido_by_session(session_id: str):
     query = Query()
     return pedidos_table.get(query.session_id == session_id)
+
+# --- Funções para Métodos de Pagamento (Fornecedor) ---
+def insert_metodo_pagamento(data: dict):
+    return metodos_pagamento_table.insert(data)
+
+def list_metodos_pagamento_by_email(email: str):
+    query = Query()
+    items = metodos_pagamento_table.search(query.fornecedor_email == email.lower().strip())
+    for item in items:
+        item['id'] = item.doc_id
+    return items
+
+def get_metodo_pagamento(id: int):
+    item = metodos_pagamento_table.get(doc_id=id)
+    if item:
+        item['id'] = item.doc_id
+    return item
+
+def update_metodo_pagamento_db(id: int, data: dict):
+    metodos_pagamento_table.update(data, doc_ids=[id])
+
+def delete_metodo_pagamento_db(id: int):
+    metodos_pagamento_table.remove(doc_ids=[id])
+
+# --- Funções para Histórico de Vendas ---
+def list_vendas_by_fornecedor(email: str):
+    # TODO: Implementar filtro real quando os pedidos tiverem vínculo direto com fornecedor
+    # Por enquanto retorna lista vazia ou lógica simulada
+    return []

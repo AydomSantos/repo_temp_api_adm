@@ -1,4 +1,5 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
+from datetime import datetime
 from typing import Optional
 
 class UserFornecedorCreateSchema(BaseModel):
@@ -8,8 +9,23 @@ class UserFornecedorCreateSchema(BaseModel):
     numero: int
     cnpj: str
 
+# Schema para atualizar os dados do perfil (tudo opcional)
+class UserFornecedorUpdateSchema(BaseModel):
+    nome: Optional[str] = None
+    numero: Optional[int] = None
+    cnpj: Optional[str] = None
+    # Novos campos de perfil
+    foto_perfil: Optional[str] = None
+    endereco: Optional[str] = None
+    cidade: Optional[str] = None
+    estado: Optional[str] = None
+
 class UserFornecedorSchema(UserFornecedorCreateSchema):
     id: int
+    foto_perfil: Optional[str] = None
+    endereco: Optional[str] = None
+    cidade: Optional[str] = None
+    estado: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -17,3 +33,40 @@ class UserFornecedorSchema(UserFornecedorCreateSchema):
 class UserFornecedorLoginSchema(BaseModel):
     email: EmailStr
     senha: str
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ForgotPasswordResponse(BaseModel):
+    mensagem: str
+    token_debug: Optional[str] = None
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    senha: str
+    confirma_senha: str
+
+class MensageResponse(BaseModel):
+    mensagem: str
+
+class ForgotPasswordResponse(BaseModel):
+    mensagem: str
+    token_debug: Optional[str] = None
+
+class MetodoPagamento(BaseModel):
+    metodo: str
+    detalhes: str
+
+class MetodoPagamentoSchema(MetodoPagamento):
+    id: int
+    data_criacao: datetime = Field(default_factory=datetime.now)
+    data_atualizacao: Optional[datetime] = None
+
+class HistoricoVenda(BaseModel):
+    id: int
+    produto_id: int
+    quantidade: int
+    valor_total: float
+    data_venda: datetime
+
+        
