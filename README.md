@@ -40,7 +40,6 @@ repo_temp_api_adm/
 │   ├── __init__.py
 │   ├── config.py             # Configurações da aplicação
 │   ├── models/               # Schemas Pydantic
-│   │   ├── auth.py
 │   │   ├── usuario_restaurante.py
 │   │   ├── usuario_fornecedor.py
 │   │   ├── produto.py
