@@ -280,7 +280,6 @@ curl -X POST "http://127.0.0.1:8000/pagamento/checkout" \
 A aplicação usa **TinyDB**, um banco de dados NoSQL baseado em arquivos JSON.
 
 ### Tabelas:
-- `users` - Usuários do sistema
 - `restaurantes` - Dados dos restaurantes
 - `fornecedores` - Dados dos fornecedores
 - `produtos` - Catálogo de produtos
