@@ -1,4 +1,4 @@
-# 🍕 Sistema de Autenticação e Gerenciamento - API
+# Sistema de Autenticação e Gerenciamento - API
 
 Uma API completa para gerenciamento de restaurantes, fornecedores, produtos e pagamentos com autenticação JWT.
 
