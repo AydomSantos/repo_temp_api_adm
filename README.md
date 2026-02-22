@@ -1,4 +1,4 @@
-# 🍕 Sistema de Autenticação e Gerenciamento - API
+# Sistema de Autenticação e Gerenciamento - API
 
 Uma API completa para gerenciamento de restaurantes, fornecedores, produtos e pagamentos com autenticação JWT.
 
@@ -40,13 +40,11 @@ repo_temp_api_adm/
 │   ├── __init__.py
 │   ├── config.py             # Configurações da aplicação
 │   ├── models/               # Schemas Pydantic
-│   │   ├── auth.py
 │   │   ├── usuario_restaurante.py
 │   │   ├── usuario_fornecedor.py
 │   │   ├── produto.py
 │   │   └── payment.py
 │   ├── rotas/                # Endpoints da API
-│   │   ├── auth_routes.py
 │   │   ├── restaurante_routes.py
 │   │   ├── fornecedor_routes.py
 │   │   ├── produto_routes.py
@@ -282,7 +280,6 @@ curl -X POST "http://127.0.0.1:8000/pagamento/checkout" \
 A aplicação usa **TinyDB**, um banco de dados NoSQL baseado em arquivos JSON.
 
 ### Tabelas:
-- `users` - Usuários do sistema
 - `restaurantes` - Dados dos restaurantes
 - `fornecedores` - Dados dos fornecedores
 - `produtos` - Catálogo de produtos
