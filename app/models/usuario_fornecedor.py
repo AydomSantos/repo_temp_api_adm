@@ -20,6 +20,7 @@ class UserFornecedorUpdateSchema(BaseModel):
     cidade: Optional[str] = None
     estado: Optional[str] = None
 
+# Schema para atualizar os dados do perfil (tudo opcional)
 class UserFornecedorSchema(UserFornecedorCreateSchema):
     id: int
     foto_perfil: Optional[str] = None
@@ -29,39 +30,35 @@ class UserFornecedorSchema(UserFornecedorCreateSchema):
 
     class Config:
         from_attributes = True
-
+# Schema para login do fornecedor
 class UserFornecedorLoginSchema(BaseModel):
     email: EmailStr
     senha: str
-
+# Schemas para recuperação de senha 
 class ForgotPasswordRequest(BaseModel):
     email: EmailStr
-
+# Schema para resposta da solicitação de recuperação de senha
 class ForgotPasswordResponse(BaseModel):
     mensagem: str
     token_debug: Optional[str] = None
 
+# Schema para resetar a senha
 class ResetPasswordRequest(BaseModel):
     token: str
     senha: str
     confirma_senha: str
 
-class MensageResponse(BaseModel):
-    mensagem: str
-
-class ForgotPasswordResponse(BaseModel):
-    mensagem: str
-    token_debug: Optional[str] = None
-
+# Schemas para o modelo de usuário do fornecedor
 class MetodoPagamento(BaseModel):
     metodo: str
     detalhes: str
 
+# Schema para atualizar os dados do perfil (tudo opcional)
 class MetodoPagamentoSchema(MetodoPagamento):
     id: int
     data_criacao: datetime = Field(default_factory=datetime.now)
     data_atualizacao: Optional[datetime] = None
-
+# Schemas para o histórico de vendas do fornecedor
 class HistoricoVenda(BaseModel):
     id: int
     produto_id: int

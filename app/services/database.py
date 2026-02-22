@@ -49,6 +49,14 @@ def find_restaurante_by_email(email: str):
 def insert_restaurante(data: dict):
     return restaurantes_table.insert(data)
 
+def update_restaurante(email: str, updates: dict):
+    query = Query()
+    restaurantes_table.update(updates, query.email == email.lower().strip())
+
+def delete_restaurante(email: str):
+    query = Query()
+    restaurantes_table.remove(query.email == email.lower().strip())
+
 # --- Funções para Fornecedores ---
 def find_fornecedor_by_email(email: str):
     query = Query()
@@ -60,6 +68,10 @@ def insert_fornecedor(data: dict):
 def update_fornecedor(email: str, updates: dict):
     query = Query()
     fornecedores_table.update(updates, query.email == email.lower().strip())
+
+def delete_fornecedor(email: str):
+    query = Query()
+    fornecedores_table.remove(query.email == email.lower().strip())
 
 def find_fornecedor_reset_token(token: str):
     query = Query()

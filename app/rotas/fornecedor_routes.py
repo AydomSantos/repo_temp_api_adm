@@ -7,6 +7,7 @@ from app.services.database import (
     find_fornecedor_by_email, 
     insert_fornecedor, 
     update_fornecedor, 
+    delete_fornecedor,
     find_fornecedor_reset_token,
     insert_metodo_pagamento,
     list_metodos_pagamento_by_email,
@@ -21,10 +22,10 @@ from app.models.auth import TokenResponse, MensageResponse
 from app.models.usuario_fornecedor import (
     UserFornecedorCreateSchema,
     UserFornecedorLoginSchema,
+    UserFornecedorUpdateSchema,
     ForgotPasswordRequest,
     ForgotPasswordResponse,
     ResetPasswordRequest,
-    MensageResponse,
     MetodoPagamento,
     MetodoPagamentoSchema,
     HistoricoVenda,
@@ -96,6 +97,29 @@ def update_password(data: ResetPasswordRequest):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Token de recuperação de senha inválido ou expirado.", 
         )
+
+@router.put("/perfil", response_model=MensageResponse)
+def update_perfil(data: UserFornecedorUpdateSchema, email: str = Depends(get_current_user_email)):
+    # Verifica se o fornecedor existe
+    user = find_fornecedor_by_email(email)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Fornecedor não encontrado.")
+    
+    # Atualiza apenas os campos fornecidos
+    updates = data.model_dump(exclude_unset=True)
+    update_fornecedor(email, updates)
+    return {"mensagem": "Perfil atualizado com sucesso."}
+
+@router.delete("/perfil", response_model=MensageResponse)
+def delete_perfil(email: str = Depends(get_current_user_email)):
+    # Verifica se o fornecedor existe
+    user = find_fornecedor_by_email(email)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Fornecedor não encontrado.")
+    
+    # Deleta o fornecedor do banco de dados
+    delete_fornecedor(email)
+    return {"mensagem": "Perfil deletado com sucesso."}
 
 @router.post("/metodos-pagamento", response_model=MetodoPagamentoSchema)
 def adicionar_metodo_pagamento(data: MetodoPagamento, current_email: str = Depends(get_current_user_email)):
