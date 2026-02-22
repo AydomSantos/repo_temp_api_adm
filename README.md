@@ -45,7 +45,6 @@ repo_temp_api_adm/
 │   │   ├── produto.py
 │   │   └── payment.py
 │   ├── rotas/                # Endpoints da API
-│   │   ├── auth_routes.py
 │   │   ├── restaurante_routes.py
 │   │   ├── fornecedor_routes.py
 │   │   ├── produto_routes.py
