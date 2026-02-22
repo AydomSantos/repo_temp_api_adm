@@ -33,6 +33,7 @@ from app.models.usuario_fornecedor import (
 
 router = APIRouter(prefix="/fornecedores", tags=["Fornecedores"])
 
+# Rota para registro de fornecedor
 @router.post("/register", response_model=MensageResponse)
 def register_fornecedor(data: UserFornecedorCreateSchema):
     if find_fornecedor_by_email(data.email):
@@ -45,6 +46,7 @@ def register_fornecedor(data: UserFornecedorCreateSchema):
     insert_fornecedor(user_data)
     return {"mensagem": "Fornecedor cadastrado com sucesso."}
 
+# Rota para login de fornecedor
 @router.post("/login", response_model=TokenResponse)
 def login_fornecedor(data: UserFornecedorLoginSchema):
     user = find_fornecedor_by_email(data.email)
@@ -55,6 +57,7 @@ def login_fornecedor(data: UserFornecedorLoginSchema):
     token = create_access_token({"sub": user['email'], "role": "fornecedor", "nome": user['nome']})
     return {"access_token": token, "token_type": "bearer"}
 
+# Rota para solicitar recuperação de senha
 @router.post("/forgot-password", response_model=ForgotPasswordResponse)
 def forgot_password(data: ForgotPasswordRequest):
     user = find_fornecedor_by_email(data.email)
@@ -75,6 +78,7 @@ def forgot_password(data: ForgotPasswordRequest):
            detail="Ocorreu um erro ao processar a solicitação.", 
         )
 
+# Rota para resetar a senha usando o token de recuperação
 @router.post("/reset-password", response_model=MensageResponse)
 def update_password(data: ResetPasswordRequest):
     if data.senha != data.confirma_senha:
@@ -98,6 +102,7 @@ def update_password(data: ResetPasswordRequest):
             detail="Token de recuperação de senha inválido ou expirado.", 
         )
 
+# Rota para atualização de perfil
 @router.put("/perfil", response_model=MensageResponse)
 def update_perfil(data: UserFornecedorUpdateSchema, email: str = Depends(get_current_user_email)):
     # Verifica se o fornecedor existe
@@ -110,6 +115,7 @@ def update_perfil(data: UserFornecedorUpdateSchema, email: str = Depends(get_cur
     update_fornecedor(email, updates)
     return {"mensagem": "Perfil atualizado com sucesso."}
 
+# Rota para deletar perfil
 @router.delete("/perfil", response_model=MensageResponse)
 def delete_perfil(email: str = Depends(get_current_user_email)):
     # Verifica se o fornecedor existe
@@ -121,6 +127,7 @@ def delete_perfil(email: str = Depends(get_current_user_email)):
     delete_fornecedor(email)
     return {"mensagem": "Perfil deletado com sucesso."}
 
+# Rotas para métodos de pagamento do fornecedor
 @router.post("/metodos-pagamento", response_model=MetodoPagamentoSchema)
 def adicionar_metodo_pagamento(data: MetodoPagamento, current_email: str = Depends(get_current_user_email)):
     # Prepara os dados
@@ -135,10 +142,12 @@ def adicionar_metodo_pagamento(data: MetodoPagamento, current_email: str = Depen
     metodo_dict["id"] = doc_id
     return metodo_dict
 
+# Rota para listar métodos de pagamento do fornecedor
 @router.get("/metodos-pagamento", response_model=List[MetodoPagamentoSchema])
 def listar_metodos_pagamento(current_email: str = Depends(get_current_user_email)):
     return list_metodos_pagamento_by_email(current_email)
 
+# Rota para atualizar método de pagamento
 @router.put("/metodos-pagamento/{id}", response_model=MetodoPagamentoSchema)
 def atualizar_metodo_pagamento(id: int, data: MetodoPagamento, current_email: str = Depends(get_current_user_email)):
     metodo_existente = get_metodo_pagamento(id)
@@ -155,6 +164,7 @@ def atualizar_metodo_pagamento(id: int, data: MetodoPagamento, current_email: st
     metodo_existente.update(updates)
     return metodo_existente
 
+# Rota para deletar método de pagamento
 @router.delete("/metodos-pagamento/{id}", response_model=MensageResponse)
 def remover_metodo_pagamento(id: int, current_email: str = Depends(get_current_user_email)):
     metodo_existente = get_metodo_pagamento(id)
@@ -165,6 +175,7 @@ def remover_metodo_pagamento(id: int, current_email: str = Depends(get_current_u
     delete_metodo_pagamento_db(id)
     return {"mensagem": "Método de pagamento removido com sucesso."}
 
+# Rota para listar histórico de vendas do fornecedor
 @router.get("/historico-vendas", response_model=List[HistoricoVenda])
 def listar_historico_vendas(current_email: str = Depends(get_current_user_email)):
     return list_vendas_by_fornecedor(current_email)

@@ -2,8 +2,6 @@ from fastapi import APIRouter, HTTPException, status, Depends
 
 from app.services.database import find_restaurante_by_email, insert_restaurante, update_restaurante, delete_restaurante
 from app.services.security import get_password_hash, verify_password, create_access_token, get_current_user_email
-from app.models.auth import TokenResponse, MensageResponse
-
 from app.models.usuario_restaurante import (
     UserRestauranteCreateSchema,
     UserRestauranteLoginSchema,
@@ -19,6 +17,7 @@ from app.models.usuario_restaurante import (
 
 router = APIRouter(prefix="/restaurantes", tags=["Restaurantes"])
 
+# Rota para registro de restaurante
 @router.post("/register", response_model=MensageResponse)
 def register_restaurante(data: UserRestauranteCreateSchema):
     # Verifica se email já existe
@@ -33,6 +32,7 @@ def register_restaurante(data: UserRestauranteCreateSchema):
     insert_restaurante(user_data)
     return {"mensagem": "Restaurante cadastrado com sucesso."}
 
+# Rota para login de restaurante
 @router.post("/login", response_model=TokenResponse)
 def login_restaurante(data: UserRestauranteLoginSchema):
     user = find_restaurante_by_email(data.email)
@@ -44,6 +44,7 @@ def login_restaurante(data: UserRestauranteLoginSchema):
     token = create_access_token({"sub": user['email'], "role": "restaurante", "nome": user['nome']})
     return {"access_token": token, "token_type": "bearer"}
 
+# Rota para solicitar recuperação de senha
 @router.post("/forgot-password", response_model=ForgotPasswordResponse)
 def forgot_password(data: ForgotPasswordRequest):
     user = find_restaurante_by_email(data.email)
@@ -53,6 +54,7 @@ def forgot_password(data: ForgotPasswordRequest):
     token_debug = create_access_token({"sub": user['email'], "role": "restaurante", "nome": user['nome']})
     return ForgotPasswordResponse(mensagem="Se um usuário com este email existir, um email de recuperação será enviado.", token_debug=token_debug)
 
+# Rota para resetar a senha usando o token de recuperação
 @router.post("/reset-password", response_model=MensageResponse)
 def update_password(data: ResetPasswordRequest):
     # Aqui você validaria o token e atualizaria a senha do usuário
@@ -61,6 +63,7 @@ def update_password(data: ResetPasswordRequest):
     # Lógica para atualizar a senha do usuário no banco de dados
     return {"mensagem": "Senha atualizada com sucesso."}
 
+# Rota para atualização de perfil
 @router.put("/perfil", response_model=MensageResponse)
 def update_perfil(data: userRestauranteUpdateSchema, email: str = Depends(get_current_user_email)):
     # Verifica se o restaurante existe
@@ -73,6 +76,7 @@ def update_perfil(data: userRestauranteUpdateSchema, email: str = Depends(get_cu
     update_restaurante(email, updates)
     return {"mensagem": "Perfil atualizado com sucesso."}
 
+# Rota para deletar perfil
 @router.delete("/perfil", response_model=MensageResponse)
 def delete_perfil(email: str = Depends(get_current_user_email)):
     # Verifica se o restaurante existe
@@ -83,6 +87,8 @@ def delete_perfil(email: str = Depends(get_current_user_email)):
     # Deleta o restaurante do banco de dados
     delete_restaurante(email)
     return {"mensagem": "Perfil deletado com sucesso."}
+
+# Rotas para métodos de pagamento do restaurante
 @router.post("/metodos-pagamento", response_model=MetodoPagamentoSchema)
 def adicionar_metodo_pagamento(data: MetodoPagamento, email: str = Depends(get_current_user_email)):
     # Verifica se o restaurante existe
@@ -93,6 +99,7 @@ def adicionar_metodo_pagamento(data: MetodoPagamento, email: str = Depends(get_c
     # Lógica para adicionar método de pagamento ao restaurante
     return MetodoPagamentoSchema(id=1, metodo=data.metodo, detalhes=data.detalhes)
 
+# Rota para listar métodos de pagamento do restaurante
 @router.get("/historico-compras", response_model=list[HistoricoCompraSchema])
 def obter_historico_compras(email: str = Depends(get_current_user_email)):
     # Verifica se o restaurante existe
