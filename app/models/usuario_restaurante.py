@@ -72,3 +72,10 @@ class HistoricoCompra(BaseModel):
 class HistoricoCompraSchema(HistoricoCompra):
     class Config:
         from_attributes = True
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+
+class MensageResponse(BaseModel):
+    mensagem: str

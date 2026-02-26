@@ -66,4 +66,9 @@ class HistoricoVenda(BaseModel):
     valor_total: float
     data_venda: datetime
 
-        
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+
+class MensageResponse(BaseModel):
+    mensagem: str

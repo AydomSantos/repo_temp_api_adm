@@ -16,10 +16,11 @@ from app.services.database import (
     delete_metodo_pagamento_db,
     list_vendas_by_fornecedor
 )
-from app.services.security import get_password_hash, verify_password, create_access_token, get_current_user_email
-from app.models.auth import TokenResponse, MensageResponse
+from app.services.security import get_password_hash, verify_password, create_access_token, require_role
 
 from app.models.usuario_fornecedor import (
+    MensageResponse,
+    TokenResponse,
     UserFornecedorCreateSchema,
     UserFornecedorLoginSchema,
     UserFornecedorUpdateSchema,
@@ -104,7 +105,7 @@ def update_password(data: ResetPasswordRequest):
 
 # Rota para atualização de perfil
 @router.put("/perfil", response_model=MensageResponse)
-def update_perfil(data: UserFornecedorUpdateSchema, email: str = Depends(get_current_user_email)):
+def update_perfil(data: UserFornecedorUpdateSchema, email: str = Depends(require_role("fornecedor"))):
     # Verifica se o fornecedor existe
     user = find_fornecedor_by_email(email)
     if not user:
@@ -117,7 +118,7 @@ def update_perfil(data: UserFornecedorUpdateSchema, email: str = Depends(get_cur
 
 # Rota para deletar perfil
 @router.delete("/perfil", response_model=MensageResponse)
-def delete_perfil(email: str = Depends(get_current_user_email)):
+def delete_perfil(email: str = Depends(require_role("fornecedor"))):
     # Verifica se o fornecedor existe
     user = find_fornecedor_by_email(email)
     if not user:
@@ -129,7 +130,7 @@ def delete_perfil(email: str = Depends(get_current_user_email)):
 
 # Rotas para métodos de pagamento do fornecedor
 @router.post("/metodos-pagamento", response_model=MetodoPagamentoSchema)
-def adicionar_metodo_pagamento(data: MetodoPagamento, current_email: str = Depends(get_current_user_email)):
+def adicionar_metodo_pagamento(data: MetodoPagamento, current_email: str = Depends(require_role("fornecedor"))):
     # Prepara os dados
     metodo_dict = data.model_dump()
     metodo_dict["fornecedor_email"] = current_email
@@ -144,12 +145,12 @@ def adicionar_metodo_pagamento(data: MetodoPagamento, current_email: str = Depen
 
 # Rota para listar métodos de pagamento do fornecedor
 @router.get("/metodos-pagamento", response_model=List[MetodoPagamentoSchema])
-def listar_metodos_pagamento(current_email: str = Depends(get_current_user_email)):
+def listar_metodos_pagamento(current_email: str = Depends(require_role("fornecedor"))):
     return list_metodos_pagamento_by_email(current_email)
 
 # Rota para atualizar método de pagamento
 @router.put("/metodos-pagamento/{id}", response_model=MetodoPagamentoSchema)
-def atualizar_metodo_pagamento(id: int, data: MetodoPagamento, current_email: str = Depends(get_current_user_email)):
+def atualizar_metodo_pagamento(id: int, data: MetodoPagamento, current_email: str = Depends(require_role("fornecedor"))):
     metodo_existente = get_metodo_pagamento(id)
     
     if not metodo_existente or metodo_existente.get("fornecedor_email") != current_email:
@@ -166,7 +167,7 @@ def atualizar_metodo_pagamento(id: int, data: MetodoPagamento, current_email: st
 
 # Rota para deletar método de pagamento
 @router.delete("/metodos-pagamento/{id}", response_model=MensageResponse)
-def remover_metodo_pagamento(id: int, current_email: str = Depends(get_current_user_email)):
+def remover_metodo_pagamento(id: int, current_email: str = Depends(require_role("fornecedor"))):
     metodo_existente = get_metodo_pagamento(id)
     
     if not metodo_existente or metodo_existente.get("fornecedor_email") != current_email:
@@ -177,5 +178,5 @@ def remover_metodo_pagamento(id: int, current_email: str = Depends(get_current_u
 
 # Rota para listar histórico de vendas do fornecedor
 @router.get("/historico-vendas", response_model=List[HistoricoVenda])
-def listar_historico_vendas(current_email: str = Depends(get_current_user_email)):
+def listar_historico_vendas(current_email: str = Depends(require_role("fornecedor"))):
     return list_vendas_by_fornecedor(current_email)
