@@ -17,19 +17,25 @@ from passlib.context import CryptContext
 
 from app.config import settings
 
-# Contexto de hash de senha com bcrypt.
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Usa PBKDF2-SHA256 para evitar incompatibilidade do bcrypt em alguns ambientes (ex.: Python 3.13).
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 # Define de qual endpoint o Swagger obtira token.
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/restaurantes/token")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Compara senha em texto puro com hash salvo."""
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        return pwd_context.verify(plain_password, hashed_password)
+    except Exception:
+        # Em caso de hash invalido/corrompido, trata como credencial incorreta.
+        return False
 
 
 def get_password_hash(password: str) -> str:
     """Gera hash seguro para persistir senha no banco."""
+    if len(password.encode("utf-8")) > 128:
+        raise ValueError("A senha excede o tamanho maximo permitido.")
     return pwd_context.hash(password)
 
 

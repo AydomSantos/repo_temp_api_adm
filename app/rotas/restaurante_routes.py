@@ -7,6 +7,7 @@ Inclui cadastro, login, recuperacao de senha e operacoes de perfil.
 import secrets
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 
 from app.config import settings
 from app.models.usuario_restaurante import (
@@ -41,7 +42,10 @@ def register_restaurante(data: UserRestauranteCreateSchema):
 
     # Armazena senha com hash e dados normalizados.
     user_data = data.model_dump()
-    user_data["senha"] = get_password_hash(user_data["senha"])
+    try:
+        user_data["senha"] = get_password_hash(user_data["senha"])
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
     user_data["email"] = user_data["email"].lower().strip()
     user_data["ativo"] = True
     user_data["reset_token"] = None
@@ -55,6 +59,27 @@ def login_restaurante(data: UserRestauranteLoginSchema):
     user = find_restaurante_by_email(data.email)
 
     if not user or not verify_password(data.senha, user["senha"]):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciais invalidas.")
+
+    if not user.get("ativo", True):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuario inativo.")
+
+    token = create_access_token({"sub": user["email"], "role": "restaurante", "nome": user["nome"]})
+    return {"access_token": token, "token_type": "bearer"}
+
+
+@router.post("/token", response_model=TokenResponse)
+def login_restaurante_oauth2(form_data: OAuth2PasswordRequestForm = Depends()):
+    """
+    Endpoint para fluxo OAuth2 do botao 'Authorize' do Swagger.
+    username = email do restaurante
+    password = senha
+    """
+    email = form_data.username.strip().lower()
+    senha = form_data.password
+
+    user = find_restaurante_by_email(email)
+    if not user or not verify_password(senha, user["senha"]):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciais invalidas.")
 
     if not user.get("ativo", True):
@@ -92,7 +117,12 @@ def update_password(data: ResetPasswordRequest):
             detail="Token de recuperacao de senha invalido ou expirado.",
         )
 
-    update_restaurante(user["email"], {"senha": get_password_hash(data.senha), "reset_token": None})
+    try:
+        new_hash = get_password_hash(data.senha)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+
+    update_restaurante(user["email"], {"senha": new_hash, "reset_token": None})
     return {"mensagem": "Senha atualizada com sucesso."}
 
 

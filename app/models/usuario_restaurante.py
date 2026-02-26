@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from typing import Optional
 from datetime import datetime
 
@@ -6,7 +6,7 @@ from datetime import datetime
 class UserRestauranteCreateSchema(BaseModel):
     nome: str
     email: EmailStr
-    senha: str
+    senha: str = Field(min_length=6, max_length=128)
     numero: int
     cnpj: str
 
@@ -19,8 +19,19 @@ class UserRestauranteSchema(UserRestauranteCreateSchema):
 
 # Schema para atualizar os dados do perfil (tudo opcional)
 class UserRestauranteLoginSchema(BaseModel):
-    email: EmailStr
-    senha: str
+    email: str
+    senha: str = Field(min_length=6, max_length=128)
+    
+    @field_validator('email', mode='before')
+    @classmethod
+    def validate_email(cls, v):
+        if not v:
+            raise ValueError('Email é obrigatório')
+        v = str(v).lower().strip()
+        # Simple email validation
+        if '@' not in v or '.' not in v.split('@')[1]:
+            raise ValueError('Email inválido')
+        return v
 
 # Schema para atualizar os dados do perfil (tudo opcional)
 class userRestauranteUpdateSchema(BaseModel):
@@ -45,8 +56,8 @@ class ForgotPasswordResponse(BaseModel):
 # Schema para resetar a senha
 class ResetPasswordRequest(BaseModel):
     token: str
-    senha: str
-    confirma_senha: str
+    senha: str = Field(min_length=6, max_length=128)
+    confirma_senha: str = Field(min_length=6, max_length=128)
 
 # Schemas para o modelo de usuário do fornecedor
 class MetodoPagamento(BaseModel):

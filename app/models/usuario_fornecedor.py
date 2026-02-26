@@ -5,7 +5,7 @@ from typing import Optional
 class UserFornecedorCreateSchema(BaseModel):
     nome: str
     email: EmailStr
-    senha: str
+    senha: str = Field(min_length=6, max_length=128)
     numero: int
     cnpj: str
 
@@ -33,7 +33,7 @@ class UserFornecedorSchema(UserFornecedorCreateSchema):
 # Schema para login do fornecedor
 class UserFornecedorLoginSchema(BaseModel):
     email: EmailStr
-    senha: str
+    senha: str = Field(min_length=6, max_length=128)
 # Schemas para recuperação de senha 
 class ForgotPasswordRequest(BaseModel):
     email: EmailStr
@@ -45,8 +45,8 @@ class ForgotPasswordResponse(BaseModel):
 # Schema para resetar a senha
 class ResetPasswordRequest(BaseModel):
     token: str
-    senha: str
-    confirma_senha: str
+    senha: str = Field(min_length=6, max_length=128)
+    confirma_senha: str = Field(min_length=6, max_length=128)
 
 # Schemas para o modelo de usuário do fornecedor
 class MetodoPagamento(BaseModel):
